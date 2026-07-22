@@ -172,7 +172,11 @@ setTimeout(function () {
             entry.appendChild(p)
             let button = document.createElement("button");
             button.className = "base-button delete-save-button"
-            button.onclick = () => alert("TODO");
+            button.onclick = () => {
+                let saves = loadSaves() || {};
+                delete saves[savedKey]
+                storeSaves(saves)
+            };
             button.innerHTML = "Delete"
             entry.appendChild(button)
             button = document.createElement("button");
