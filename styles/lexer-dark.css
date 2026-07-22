@@ -1,7 +1,8 @@
+/*
 @media (prefers-color-scheme: dark) {
     .editor-highlight {
-        /*--text-color:;*/
-        /*color: darkgray;*/
+        !*--text-color:;*!
+        !*color: darkgray;*!
     }
 
     .token-GraphName {
@@ -15,8 +16,8 @@
 
     .token-ContentBraceOpen, .token-ContentBraceClose {
         color: white;
-        /*color: white;*/
-        /*background: dodgerblue;*/
+        !*color: white;*!
+        !*background: dodgerblue;*!
     }
 
     .token-Error {
@@ -33,4 +34,4 @@
     .token-TitleBraceOpen, .token-TitleBraceClose {
         color: darkgreen;
     }
-}
+}*/

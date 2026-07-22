@@ -18,8 +18,8 @@ setTimeout(function () {
 
     let saveContainer = myRoot.querySelector(".save-container") as HTMLDivElement
 
-    const SETTING_KEY = "block_graph_zelaux"
-    const LAST_SETTING_KEY = "block_graph_zelaux.last"
+    const SETTING_KEY = "block_graph"
+    const LAST_SETTING_KEY = "block_graph.last"
 
     buttonAction(myRoot.querySelector("#download-all"), () => {
         let item = localStorage.getItem(SETTING_KEY);
@@ -48,7 +48,7 @@ setTimeout(function () {
         }
         let resultFileName = prompt("File name?", "all-svg")!;
         if (resultFileName == null) return
-        let downloadButton: HTMLButtonElement = document.querySelector("button.download_button")!;
+        let downloadButton = document.querySelector("button.download_button")! as HTMLButtonElement;
         let currentSave = createSaveInfo();
         let savesList: SaveInfo[] = []
         for (let key in saves) {

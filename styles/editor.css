@@ -1,31 +1,38 @@
-
+/* ------------------------------------------------------------- code editor */
 .textarea-container {
     position: relative;
-    border: 4px solid black;
-
-    @media (prefers-color-scheme: dark) {
-        border-color: lightgray;
-    }
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+    transition: border-color .12s, box-shadow .12s;
 }
 
-textarea {
-    /*border: 4px solid black;*/
-
+.textarea-container.code-focused {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-ring);
 }
-/*.textarea-container-container{
+
+/* shared metrics — textarea and the highlight overlay MUST match exactly */
+.textarea-container > * {
+    font: 15px / 1.55em var(--font-mono);
+    padding: 16px 18px;
+}
+
+.input_area {
     width: 100%;
-    overflow: scroll;
-}*/
-.textarea-container>*{
-    font: 16px "JetBrains Mono", monospace;
-    line-height: 1.2em;
-}
-.input_area{
-    width: 100%;
-
+    /* default to a bit under half the viewport; still drag-resizable */
+    height: 48vh;
+    min-height: 160px;
     display: block;
     resize: vertical;
     white-space: nowrap;
+    background: transparent;
+    /*caret-color: var(--accent);*/
+    caret-color: transparent;
+    color: var(--text);
+    position: relative;
+    z-index: 1;
 }
 
 .editor-highlight {
@@ -34,45 +41,38 @@ textarea {
     left: 0;
     width: 100%;
     height: 100%;
-    /*padding: 4px;*/
-    z-index: -1;
+    z-index: 0;
     display: block;
     overflow: scroll;
+    color: var(--tok-base);
 }
-.editor-highlight>div{
+
+.editor-highlight > div {
     width: fit-content;
     height: fit-content;
 }
-.error_label {
-    width: 100%;
-}
+
+/* custom caret */
 .cursor {
     width: 0;
-    height: 1em;
+    height: 1.25em;
     display: inline-block;
+    /*display: none;*/
     position: relative;
     vertical-align: bottom;
     overflow: visible;
 }
 
-:root {
-    --cursor-blink: 1
-}
+:root { --cursor-blink: 1 }
 
 .cursor > * {
     margin: 0;
-    /*width: 1px;*/
-    border-left: 1px solid black;
-    @media (prefers-color-scheme: dark) {
-        border-color: white;
-    }
-    height: 1em;
+    border-left: 1.5px solid var(--accent);
+    height: 1.25em;
     display: inline-block;
     opacity: var(--cursor-blink);
 }
 
 @keyframes blinker {
-    50% {
-        opacity: 0;
-    }
+    50% { opacity: 0; }
 }

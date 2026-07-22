@@ -1,7 +1,7 @@
 //depends: block
 class BranchTitle {
-    text:NullableGraphText
-    position:TitlePosition
+    text: NullableGraphText
+    position: TitlePosition
 
     constructor(text: NullableGraphText, position: TitlePosition) {
         this.text = text;
@@ -10,13 +10,13 @@ class BranchTitle {
 }
 class HorizontalBranchInfo {
     rootPosition?: Vector
-    title?:BranchTitle
+    title?: BranchTitle
     offset!: Vector;
     bb!: BlockBoundingBox
     bounds!: Bounds
     output!: Vector
     isEmpty!: boolean
-    element!:Block
+    element!: Block
 
     setBB(bb: BlockBoundingBox) {
         this.bb = bb;
@@ -24,8 +24,8 @@ class HorizontalBranchInfo {
     }
 
     setElement(element: Block) {
-        this.element=element;
-        this.isEmpty=element.isEmpty()
+        this.element = element;
+        this.isEmpty = element.isEmpty()
     }
 }
 
@@ -64,7 +64,7 @@ class HorizontalBranchBlockOfBlocks extends BlockOfBlocks {
     constructor() {
         super(null);
     }
-static displayBranches(self:AbstractBlock,cursorY: Cursor, branchInfos: HorizontalBranchInfo[], centerXCursor: Cursor, compileInfo: CompileInfo, svgResult: string[], topMargin: number) {
+    static displayBranches(self: AbstractBlock, cursorY: Cursor, branchInfos: HorizontalBranchInfo[], centerXCursor: Cursor, compileInfo: CompileInfo, svgResult: string[], topMargin: number) {
         let maxY = cursorY.value
         //Drawing inner elements
         for (let i = 0; i < branchInfos.length; i++) {
@@ -143,7 +143,7 @@ static displayBranches(self:AbstractBlock,cursorY: Cursor, branchInfos: Horizont
         }
         height += compileInfo.topMargin
         height += compileInfo.topMargin * 3
-        return BlockBoundingBoxWithChildren.makeCenter(width+this.marginBetweenBlocks*(boxes.length-1), height, 0, boxes);
+        return BlockBoundingBoxWithChildren.makeCenter(width + this.marginBetweenBlocks * (boxes.length - 1), height, 0, boxes);
     }
 
     compile(centerXCursor: Cursor, cursorY: Cursor, compileInfo: CompileInfo) {
@@ -161,19 +161,19 @@ static displayBranches(self:AbstractBlock,cursorY: Cursor, branchInfos: Horizont
 
         let branchInfos: HorizontalBranchInfo[]
         {
-            let xOffset=-myBB.bounds.width() / 2+BlockBoundingBox.extraSize.x
-            branchInfos=this.innerElements.map((element,i) => {
+            let xOffset = -myBB.bounds.width() / 2 + BlockBoundingBox.extraSize.x
+            branchInfos = this.innerElements.map((element, i) => {
                 let info = new HorizontalBranchInfo();
                 info.setElement(element)
                 info.setBB(myBB.children[i])
-                info.offset=new Vector(xOffset-info.bounds.left,0)
-                xOffset+=info.bounds.width()+margin
+                info.offset = new Vector(xOffset - info.bounds.left, 0)
+                xOffset += info.bounds.width() + margin
                 return info;
             })
         }
 
         cursorY.move(topMargin)
-            HorizontalBranchBlockOfBlocks.displayBranches(this, cursorY, branchInfos, centerXCursor, compileInfo, svgResult, topMargin);
+        HorizontalBranchBlockOfBlocks.displayBranches(this, cursorY, branchInfos, centerXCursor, compileInfo, svgResult, topMargin);
         svgResult.push("</g>")
         return new CompileResult(Vector.new(centerXCursor, cursorY), svgResult)
     }

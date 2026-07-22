@@ -1,32 +1,26 @@
-.editor-highlight {
-    color: black;
-}
+/* ------------------------------------------------- syntax highlight tokens */
+/* colours come from the theme variables in index.css (light + dark)         */
 
-.token-Content {
-    /*background: lightgray;*/
-}
+.editor-highlight { color: var(--tok-base); }
 
-.token-ContentBraceOpen, .token-ContentBraceClose {
-    color: #777777;
-    /*color: white;*/
-    /*background: dodgerblue;*/
-}
+.token-Content { color: var(--tok-base); }
+
+.token-ContentBraceOpen,
+.token-ContentBraceClose { color: var(--tok-brace); }
 
 .token-GraphName {
-    color: blue;
+    color: var(--tok-graph);
+    font-weight: 700;
 }
+
+.token-Title { color: var(--tok-title); }
+
+.token-TitleBraceOpen,
+.token-TitleBraceClose { color: var(--tok-title-brace); }
 
 .token-Error {
-    color: red;
+    color: var(--tok-error);
     text-decoration: underline;
     text-decoration-style: wavy;
-    text-decoration-color: darkred;
-}
-
-.token-Title {
-    color: green;
-}
-
-.token-TitleBraceOpen, .token-TitleBraceClose {
-    /*color: darkgreen;*/
+    text-decoration-color: var(--tok-error);
 }

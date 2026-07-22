@@ -88,12 +88,6 @@ class AbstractBlock {
             throw new Error("Parent is null");
         return this.parentInfo;
     }
-    nextElement(error = false) {
-        var _a;
-        if (error)
-            return this.assertHasParent().siblingIndex(1);
-        return (_a = this.parentInfo) === null || _a === void 0 ? void 0 : _a.siblingIndex(1);
-    }
 }
 class BlockOfBlocks extends AbstractBlock {
     constructor(rootElement) {

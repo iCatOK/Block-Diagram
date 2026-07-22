@@ -20,7 +20,7 @@ class BlockBoundingBox {
     static defaultExtraSize=Vector.finalValue(4,4)
     static extraSize=BlockBoundingBox.defaultExtraSize.copy()
 
-    constructor( bounds: Bounds, output: number) {
+    constructor(bounds: Bounds, output: number) {
         if(output!==0)throw new Error()
         this.outputWire = output;
         this.bounds = bounds;
@@ -141,11 +141,6 @@ abstract class AbstractBlock implements Block {
     protected assertHasParent() {
         if (this.parentInfo == null) throw new Error("Parent is null")
         return this.parentInfo
-    }
-
-    protected nextElement(error: boolean = false) {
-        if (error) return this.assertHasParent().siblingIndex(1)
-        return this.parentInfo?.siblingIndex(1)
     }
 }
 

@@ -334,8 +334,8 @@ const TextareaExtension = (function () {
                 window.addEventListener('resize', updateAll)
             }, 0.5)
             setTimeout(() => {
-                let btn: HTMLButtonElement = document.querySelector("button.generate_button")!;
-                let prev = btn.onclick!;
+                let btn: HTMLButtonElement = document.querySelector("button.generate_button")! as HTMLButtonElement;
+                let prev = btn.onclick! as ((this: GlobalEventHandlers, ev: MouseEvent) => any);
                 btn.onclick = function (ev: MouseEvent) {
                     prev.call(this, ev)
                     setTimeout(updateAll)

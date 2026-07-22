@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link href="styles/zero.css" type="text/css" rel="stylesheet"/>
+    <link href="styles/lexer.css" type="text/css" rel="stylesheet"/>
+    <link href="styles/lexer-dark.css" type="text/css" rel="stylesheet"/>
+    <link href="styles/index.css" type="text/css" rel="stylesheet"/>
+    <link href="styles/editor.css" type="text/css" rel="stylesheet"/>
+    <link href="styles/saves.css" type="text/css" rel="stylesheet"/>
+    <link href="styles/docs_sidebar.css" type="text/css" rel="stylesheet"/>
+    <link href="styles/docs_html.css" type="text/css" rel="stylesheet"/>
+
+
+    <script src="type-script/utils/finalProxy.js"></script>
+    <script src="type-script/utils/utils.js"></script>
+    <script src="type-script/font-stuff.js"></script>
+    <script src="type-script/svg_stuff.js"></script>
+    <script src="type-script/classes.js"></script>
+    <script src="type-script/graph.js"></script>
+    <script src="type-script/block.js"></script>
+    <script src="type-script/block/simpleBlockOfBlocks.js"></script>
+    <script src="type-script/block/horizontalBranchBlockOfBlocks.js"></script>
+    <script src="type-script/block/ifHorizontalBlock.js"></script>
+    <script src="type-script/block/blockOfElements.js"></script>
+    <script src="type-script/block/sidedIfBlock.js"></script>
+    <script src="type-script/result.js"></script>
+
+
+    <script src="type-script/handlers.js"></script>
+    <script src="type-script/lexer.js"></script>
+    <script src="type-script/parser.js"></script>
+
+    <script src="type-script/index.js"></script>
+
+    <script defer src="type-script/ui/docs.js"></script>
+
+</head>
+<body>
+
+<h2>Синтаксис</h2>
+<p>Пример</p>
+<pre class="lua">название(текст/параметры)(текст/параметры)[подпись 1][подпись 2...]{
+    дочерний элемент 1
+    дочерний элемент 2
+}{
+    дочерний элемент из другого списка дочерних элементов
+}</pre>
+
+<p>У большинства элементов текст внутри элемента можно задать написав <code>(текст)</code>, <code>`текст`</code> или
+    <code>"текст"</code> после названия блока.
+    <br>
+    Например:</p>
+<pre>start(start1)
+start`start2`
+start"start3"</pre>
+<img src="doc/brace-preview.svg" class="preview-img" alt="brace-preview">
+
+<p>Обратите внимание, если вы хотите использовать закрывающий элемент (<code>)</code>, <code>`</code> или <code>"</code>)
+    внутри текста блока,
+    то его нужно экранировать.
+    <br>
+    Например:</p>
+<pre>start(function1(a1, a2\))
+end</pre>
+<img src="doc/escaping.svg" class="preview-img" alt="escaping">
+
+<h2>Элементы</h2>
+<p>Через <code>/</code> написаны варианты имени одного и того же элемента.</p>
+
+<h3>start</h3>
+<pre>start
+start(Custom)</pre>
+<img src="doc/start.svg" class="preview-img" alt="start">
+
+<h3>end / stop</h3>
+<pre>end
+end(Custom)</pre>
+<img src="doc/end.svg" class="preview-img" alt="end">
+
+<h3>connector</h3>
+<pre>connector
+connector(1)</pre>
+<img src="doc/connector.svg" class="preview-img" alt="connector">
+
+<h3>program</h3>
+<p>Этот элемент улучшает визуальную составляющую кода схемы, заменяя <code>start</code> и <code>end</code>.</p>
+<pre>program(CustomStart)(CustomEnd){
+    data(Hello, world!)
+}</pre>
+<img src="doc/program.svg" class="preview-img" alt="program">
+
+<h3>process / block</h3>
+<pre>process(x = 0)
+block(x = x + 1)</pre>
+<img src="doc/process.svg" class="preview-img" alt="process">
+
+<h3>data / io</h3>
+<pre>data(Hello, world!)
+io(Hello, world2!)</pre>
+<img src="doc/data.svg" class="preview-img" alt="data">
+
+<h3>function / func / fun / def</h3>
+<pre>function`function(a,b,c)`
+func`func(a,b,c)`
+fun`fun(a,b,c)`
+def`def(a,b,c)`</pre>
+<img src="doc/function.svg" class="preview-img" alt="function">
+
+<h3>if</h3>
+<p>Поддерживает 2 и 3 ветки. Названия по умолчанию имеются только для двух. Блок имеет дочерние блоки.</p>
+<pre>if(x % 2 = 0){
+    io(Чётное)
+}{
+    io(Нечётное)
+}
+if(x % 2)[0][1]{
+    io(Чётное)
+}{
+    io(Нечётное)
+}
+if(x и 0)[<][==][>]{
+    io(Меньше нуля)
+}{
+    io(Равно нулю)
+}{
+    io(Больше нуля)
+}</pre>
+<img src="doc/if.svg" class="preview-img" alt="if">
+
+<h3>loop</h3>
+<pre>block(x = 0)
+loop(pre-text)(post-text){
+    io(Тело цикла)
+}
+io(Done.)</pre>
+<img src="doc/loop.svg" class="preview-img" alt="loop">
+
+<h3>sideLoop</h3>
+<p>Делает цикл со сдвигом. Если элементов недостаточно, делает обычный loop.</p>
+<pre>block(x = 0)
+sideLoop(pre-text)(post-text){
+    block(Тело цикла)
+    block(Тело цикла)
+}
+io(Done.)</pre>
+<img src="doc/sideLoop.svg" class="preview-img" alt="sideLoop">
+
+<h3>for</h3>
+<p>Делает такой же loop, но при этом реализуя привычный нам for.</p>
+<pre>for(i = 0)(i < 10)(i++){
+    io(i)
+}</pre>
+<img src="doc/for.svg" class="preview-img" alt="for">
+
+<h3>sideFor</h3>
+<p>Делает sideLoop из структуры for.</p>
+<pre>sideFor(i = 0)(i < 10)(i++){
+    block(j = i + 1)
+    func(print(j\))
+}</pre>
+<img src="doc/sideFor.svg" class="preview-img" alt="sideFor">
+
+<h3>parallel / join</h3>
+<p>Имеет неограниченное число дочерних последовательностей элементов. Имеется возможность указать расстояние между
+    последовательностями.</p>
+<pre>parallel(20){
+    start
+    connector(1)
+}{
+    connector(1)
+    connector(2)
+}{
+    connector(2)
+    end
+}</pre>
+<img src="doc/parallel_join1.svg" class="preview-img" alt="parallel_join1">
+<pre>parallel(20){
+    connector(1)
+}{
+    connector(2)
+}{
+    connector(3)
+}
+io(Hello, world!)
+end</pre>
+<img src="doc/parallel_join2.svg" class="preview-img" alt="parallel_join2">
+
+<h3>left_if</h3>
+<pre>program{
+    left_if(a>b){
+        io(a)
+    }{
+        io(b)
+    }
+}</pre>
+<img src="doc/left_if.svg" class="preview-img" alt="left_if">
+
+<h3>right_if</h3>
+<pre>program{
+    right_if(a>b){
+        io(a)
+    }{
+        io(b)
+    }
+}</pre>
+<img src="doc/right_if.svg" class="preview-img" alt="right_if">
+
+<script>
+    // Синхронизация темы
+    window.addEventListener('message', (event) => {
+        if (event.data.theme) {
+            document.documentElement.setAttribute('data-theme', event.data.theme);
+        }
+    });
+</script>
+</body>
+</html>

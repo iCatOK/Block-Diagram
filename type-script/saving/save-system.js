@@ -19,8 +19,8 @@ setTimeout(function () {
     let nameInput = myRoot.querySelector("#save-name");
     let saveButton = myRoot.querySelector(".save-button");
     let saveContainer = myRoot.querySelector(".save-container");
-    const SETTING_KEY = "block_graph_zelaux";
-    const LAST_SETTING_KEY = "block_graph_zelaux.last";
+    const SETTING_KEY = "block_graph";
+    const LAST_SETTING_KEY = "block_graph.last";
     buttonAction(myRoot.querySelector("#download-all"), () => {
         let item = localStorage.getItem(SETTING_KEY);
         download("block_graph_save.json", item == null ? "{}" : item);

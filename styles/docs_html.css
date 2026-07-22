@@ -1,0 +1,77 @@
+body {
+    padding: 24px;
+    background-color: var(--surface); /* Адаптивный фон */
+    color: var(--text); /* Адаптивный цвет текста */
+    line-height: 1.6;
+    font-family: var(--font-ui);
+    font-size: 14px;
+}
+h2 {
+    color: var(--accent);
+    border-bottom: 2px solid var(--border-strong);
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    padding-bottom: 8px;
+    font-size: 1.5rem;
+}
+h3 {
+    margin-top: 2rem;
+    color: var(--text);
+    border-left: 4px solid var(--accent);
+    padding-left: 12px;
+    font-size: 1.1rem;
+}
+p { margin-bottom: 10px; }
+
+code {
+    background: var(--surface-3);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    font-family: var(--font-mono);
+    font-size: 0.95em;
+}
+pre{
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 16px 18px;
+}
+
+.element-item {
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+}
+.element-item strong {
+    color: var(--accent);
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+}
+.desc {
+    color: var(--text-muted);
+    font-size: 0.9em;
+    margin-bottom: 8px;
+}
+
+.note {
+    background: var(--accent-soft);
+    padding: 10px;
+    border-left: 4px solid var(--accent);
+    margin: 15px 0;
+    font-size: 0.9em;
+}
+.preview-img {
+    display: block;
+    margin-top: 10px;
+    background: #fbfaf6; /* Цвет бумаги из index.css */
+    border: 1px solid var(--paper-border);
+    border-radius: var(--radius-xs);
+    max-width: 100%;
+    height: auto;
+    padding: 8px;
+    margin-left: 32px;
+}

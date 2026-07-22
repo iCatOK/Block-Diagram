@@ -1,6 +1,6 @@
 "use strict";
 setTimeout(function () {
-    let svgRootElement = document.querySelector("svg");
+    let svgRootElement = document.querySelector(".main_svg");
     let textAreaElement = document.querySelector("textarea.input_area");
     /**@type HTMLLabelElement*/
     let labelElement = document.querySelector("label.error_label");

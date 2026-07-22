@@ -1,49 +1,115 @@
+/* ----------------------------------------------------------- saves block -- */
+.saves-setting { display: flex; flex-direction: column; gap: 12px; }
 
-/*region save block*/
-.save-container{
+.saves-setting > div { display: flex; gap: 8px; flex-wrap: wrap; }
+/*.saves-setting > div > * { flex: 1 1 auto; }*/
+.saves-setting > .row > * { flex: 1 1 auto; }
 
-}
-.save-entry{
-    border-bottom: solid 4px var(--button-darkgray);
+details {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
 }
 
-.save-entry:last-child{
-    border-bottom: none;
+summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    list-style: none;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
-.save-entry{
-    padding: 8px 0 8px 0;
+
+summary::-webkit-details-marker { display: none; }
+
+summary::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border-left: 5px solid currentColor;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    transition: transform .15s;
+}
+
+details[open] > summary::before { transform: rotate(90deg); }
+
+.save-container {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+/*.save-container:empty { display: none; }*/
+details:has(.save-container:empty) { display: none; }
+.save-entry {
+    padding: 10px 12px;
     display: flex;
     flex-direction: row;
     align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    transition: background .12s;
 }
-.save-entry >:first-child{
+
+.save-entry:hover { background: var(--surface-2); }
+.save-entry:last-child { border-bottom: none; }
+
+.save-entry > :first-child {
     flex: 1;
-    margin-right: 8px;
+    margin-right: 4px;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-/*endregion*/
+
+.save-entry .base-button { padding: 6px 12px; font-size: 13px; }
+
+.delete-save-button:hover {
+    color: var(--tok-error);
+    border-color: var(--tok-error);
+}
+
+/* ------------------------------------------------------- file input button */
+input[type="file"] {
+    color: var(--text-muted);
+    font-size: 13px;
+}
 
 input[type="file"]::-webkit-file-upload-button {
     visibility: hidden;
+    width: 0;
 }
 
 input[type="file"]::before {
     content: 'Select some files';
     display: inline-block;
-    background: linear-gradient(top, #f9f9f9, #e3e3e3);
-    border: 1px solid #999;
-    border-radius: 3px;
-    padding: 5px 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-xs);
+    padding: 7px 12px;
     outline: none;
     white-space: nowrap;
     -webkit-user-select: none;
     cursor: pointer;
-    text-shadow: 1px 1px #fff;
-    font-weight: 700;
-    font-size: 10pt;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    transition: background .15s, border-color .15s;
 }
+
 input[type="file"]:hover::before {
-    border-color: black;
+    background: var(--surface-3);
+    border-color: var(--text-faint);
 }
-input[type="file"]:active::before {
-    background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
-}
+
+input[type="file"]:active::before { transform: translateY(1px); }

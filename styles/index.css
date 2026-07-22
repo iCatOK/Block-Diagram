@@ -1,132 +1,471 @@
+/* ===========================================================================
+   Block-Diagram — "drafting tool" design system & layout
+   Flat, paper-and-ink, monospace, crisp edges.
+   =========================================================================== */
+
 @font-face {
     font-family: 'JetBrains Mono';
     src: url('assets/fonts/JetBrainsMono-Regular.ttf') format('truetype');
-    font-weight: bold;
+    font-weight: normal;
     font-style: normal;
 }
-body{
-    font-family: "JetBrains Mono", monospace;
-}
 
+/* ----------------------------------------------------------------- tokens -- */
 :root {
+    --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, ui-monospace, monospace;
+    --font-ui: var(--font-mono);
 
+    /* paper & ink (light) */
+    --bg: #f3f1ea;
+    --surface: #fbfaf6;
+    --surface-2: #efece2;
+    --surface-3: #e5e1d4;
+    --border: #d6d2c4;
+    --border-strong: #211e19;
+    --text: #211e19;
+    --text-muted: #6d685d;
+    --text-faint: #9b958a;
 
+    /* single deliberate accent — a marker/ochre */
+    --accent: #b4470f;
+    --accent-hover: #9a3c0c;
+    --accent-soft: rgba(180, 71, 15, .12);
+    --accent-ring: rgba(180, 71, 15, .28);
 
-    --white: white;
-    --black: black;
-    --button-darkgray: darkgray;
-    --button-gray_d: #dddddd;
-    --button-gray_e: #eeeeee;
-    --gray_a: #aaaaaa;
+    /* primary button (solid ink on light) */
+    --btn-bg: #211e19;
+    --btn-fg: #f6f4ee;
+    --btn-bg-hover: #000000;
+
+    /* the diagram paper — kept light in both themes */
+    --paper: #fbfaf6;
+    --paper-border: #211e19;
+
+    /* sharp edges */
+    --radius: 4px;
+    --radius-sm: 3px;
+    --radius-xs: 2px;
+
+    /* syntax tokens (light) */
+    --tok-base: #2a2620;
+    --tok-graph: #1f4f8b;
+    --tok-title: #2f6b3a;
+    --tok-title-brace: #326332;
+    --tok-brace: #66665c;
+    /*--tok-brace: #a39c8e;*/
+    --tok-error: #b4231f;
+
+    color-scheme: light;
 }
 
+/* dark palette — shared between system preference and the manual toggle */
 @media (prefers-color-scheme: dark) {
-    :root {
-        --text-color: lightgray;
-        --white: black;
-        --black: white;
-        --button-darkgray: #565656;
-        --button-gray_d: #222222;
-        --button-gray_e: #111111;
-        --gray_a: #555555;
-    }
+    :root:not([data-theme="light"]) {
+        --bg: #16140f;
+        --surface: #201d17;
+        --surface-2: #2a261e;
+        --surface-3: #353026;
+        --border: #3a352b;
+        --border-strong: #6a6353;
+        --text: #e9e4d8;
+        --text-muted: #a7a193;
+        --text-faint: #726c5e;
 
-    body {
-        background: black;
-    }
+        --accent: #e07b3c;
+        --accent-hover: #f0925a;
+        --accent-soft: rgba(224, 123, 60, .16);
+        --accent-ring: rgba(224, 123, 60, .35);
 
-    * {
-        color: var(--text-color);
-    }
+        --btn-bg: #e9e4d8;
+        --btn-fg: #1a1812;
+        --btn-bg-hover: #ffffff;
 
-    svg {
-        background: gray;
+        --paper: #f4f2ea;
+        --paper-border: #4a4538;
+
+        --tok-base: #cdc7b8;
+        --tok-graph: #74a3e0;
+        --tok-title: #76c08a;
+        /*--tok-brace: #6f695b;*/
+        --tok-brace: #a3998e;
+        --tok-error: #e06a5f;
+
+        color-scheme: dark;
     }
 }
 
+:root[data-theme="dark"] {
+    --bg: #16140f;
+    --surface: #201d17;
+    --surface-2: #2a261e;
+    --surface-3: #353026;
+    --border: #3a352b;
+    --border-strong: #6a6353;
+    --text: #e9e4d8;
+    --text-muted: #a7a193;
+    --text-faint: #726c5e;
+
+    --accent: #e07b3c;
+    --accent-hover: #f0925a;
+    --accent-soft: rgba(224, 123, 60, .16);
+    --accent-ring: rgba(224, 123, 60, .35);
+
+    --btn-bg: #e9e4d8;
+    --btn-fg: #1a1812;
+    --btn-bg-hover: #ffffff;
+
+    --paper: #f4f2ea;
+    --paper-border: #4a4538;
+
+    --tok-base: #cdc7b8;
+    --tok-graph: #74a3e0;
+    --tok-title: #76c08a;
+    --tok-brace: #6f695b;
+    --tok-error: #e06a5f;
+
+    color-scheme: dark;
+}
+
+/* --------------------------------------------------------------- base ----- */
+body {
+    font-family: var(--font-ui);
+    color: var(--text);
+    background-color: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+::selection {
+    background: var(--accent-soft);
+    color: var(--text);
+}
+
+/* --------------------------------------------------------------- layout --- */
 .main_div {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-}
-
-.main_div > svg {
-    margin: auto;
-}
-
-
-
-.extra_container {
     display: flex;
     flex-direction: column;
-}
-
-.extra_container > * {
-    width: 100%;
-}
-
-.buttons, .fields {
-    display: flex;
-}
-
-.buttons > * {
-    flex: 1;
-}
-
-.fields {
-    flex-direction: column;
-}
-
-.fields > * {
-    width: 100%;
-    padding: 8px;
-    border: 3px solid var(--gray_a);
-}
-
-.fields input{
-    height: 1.5em;
-    @media (prefers-color-scheme: dark) {
-        color: black;
-    }
-
-}
-.fields > div > * {
-    @media (prefers-color-scheme: dark) {
-        /*color: ;*/
-    }
-}
-
-.base-button {
-    padding: 8px;
-    background: var(--button-gray_e);
-    border: 3px var(--button-darkgray) solid;
-}
-
-.base-button:hover {
-    background: var(--button-gray_d);
-}
-
-.base-button:active {
-    color: var(--button-gray_d);
-    background: var(--button-darkgray);
-    border-color: var(--button-gray_d);
-}
-span.hotkey{
-    font-size: 0.7em;
-    color: gray;
-}
-
-
-
-.svg_container {
-    display: flex;
     height: 100vh;
+    min-height: 0;
+}
+
+.app-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 22px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-strong);
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.app-logo {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+}
+
+.app-logo svg { width: 22px; height: 22px; display: block; }
+
+.app-title {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    line-height: 1.15;
+}
+
+.app-subtitle {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    letter-spacing: .01em;
+}
+
+.theme-toggle {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    transition: color .12s, background .12s;
+}
+
+.theme-toggle:hover { color: var(--text); background: var(--surface-2); }
+.theme-toggle:active { background: var(--surface-3); }
+.theme-toggle svg { width: 19px; height: 19px; }
+.theme-toggle .icon-sun { display: none; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: block; }
+    :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+}
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
+
+.workspace {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.9fr) minmax(380px, 1fr);
+    gap: 16px;
+    padding: 16px;
+}
+
+/* ----------------------------------------------------------- diagram pane - */
+.svg_container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    min-height: 0;
+    padding: 22px;
+    overflow: auto;
+    border-radius: var(--radius);
+    background-color: var(--surface);
+    border: 1px solid var(--border-strong);
+    /* fine engineering grid */
+    background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: -1px -1px;
 }
 
 .svg_container > svg {
     margin: auto;
-    border: 3px solid black;
+    max-width: 100%;
+    height: auto;
+    background: rgba(255,255,255,0.5);
+    /*background: var(--paper);*/
+    border: 1px solid var(--paper-border);
+    border-radius: var(--radius-xs);
+}
 
-    @media (prefers-color-scheme: dark) {
-        border-color: gray;
-    }
+/* zero-sized helper svg lives here too — keep it invisible */
+.svg_container > svg[width="0"] {
+    border: 0;
+    background: transparent;
+}
+
+/* ----------------------------------------------------------- control pane - */
+.control-panel {
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 4px;
+}
+
+/* keep each panel at its natural height — the panel itself scrolls */
+.control-panel > * { flex: 0 0 auto; }
+
+.control-panel::-webkit-scrollbar { width: 10px; }
+.control-panel::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 0;
+    border: 3px solid var(--bg);
+}
+.control-panel::-webkit-scrollbar-track { background: transparent; }
+
+.extra_container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* buttons row ------------------------------------------------------------- */
+.buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.buttons > * { flex: 1; }
+
+/* settings / saves card --------------------------------------------------- */
+.fields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fields > * {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.serialize {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.serialize label { font-weight: 400; }
+
+/* inputs ------------------------------------------------------------------ */
+.fields input[type="text"],
+.fields input[type="number"],
+#save-name {
+    height: calc(1.5em + 14px);
+    padding: 0 11px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    transition: border-color .12s, box-shadow .12s, background .12s;
+}
+
+.fields input[type="text"]:focus,
+.fields input[type="number"]:focus,
+#save-name:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.fields input[type="number"] { width: 92px; text-align: right; }
+
+/* square checkboxes ------------------------------------------------------- */
+.fields input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-xs);
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    position: relative;
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition: background .12s, border-color .12s;
+}
+
+.fields input[type="checkbox"]:hover { border-color: var(--accent); }
+
+.fields input[type="checkbox"]::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--btn-fg);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform .12s;
+}
+
+.fields input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.fields input[type="checkbox"]:checked::after { transform: rotate(45deg) scale(1); }
+
+/* buttons ----------------------------------------------------------------- */
+.base-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background .12s, color .12s, border-color .12s, transform .06s;
+    white-space: nowrap;
+}
+
+.base-button:hover { background: var(--surface-3); }
+
+.base-button:active {
+    transform: translateY(1px);
+    background: var(--surface-3);
+}
+
+/* the primary call-to-action */
+.generate_button {
+    color: var(--btn-fg);
+    background: var(--btn-bg);
+    border-color: var(--btn-bg);
+}
+
+.generate_button:hover {
+    background: var(--btn-bg-hover);
+    border-color: var(--btn-bg-hover);
+}
+
+.generate_button:active { background: var(--btn-bg-hover); }
+
+span.hotkey {
+    font-size: .72em;
+    font-weight: 500;
+    opacity: .8;
+    padding: 1px 5px;
+    border-radius: var(--radius-xs);
+    border: 1px solid currentColor;
+    line-height: 1.4;
+}
+
+.base-button:not(.generate_button) span.hotkey {
+    color: var(--text-faint);
+}
+
+/* error label ------------------------------------------------------------- */
+.error_label {
+    width: 100%;
+    min-height: 0;
+    display: block;
+    color: var(--tok-error);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+.error_label:not(:empty) {
+    padding: 11px 13px;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    border: 1px solid var(--tok-error);
+    border-left-width: 3px;
+}
+
+/* ----------------------------------------------------------- responsive -- */
+@media (max-width: 940px) {
+    .main_div { height: auto; min-height: 100vh; }
+    .workspace { grid-template-columns: 1fr; }
+    .control-panel { overflow: visible; }
+    .svg_container { min-height: 52vh; }
 }

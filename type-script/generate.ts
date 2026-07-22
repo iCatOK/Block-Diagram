@@ -1,13 +1,13 @@
 setTimeout(function () {
-    let svgRootElement = document.querySelector("svg")!;
+    let svgRootElement : SVGSVGElement = document.querySelector(".main_svg")! as SVGSVGElement;
 
-    let textAreaElement: HTMLTextAreaElement = document.querySelector("textarea.input_area")!;
+    let textAreaElement: HTMLTextAreaElement = document.querySelector("textarea.input_area")! as HTMLTextAreaElement;
     /**@type HTMLLabelElement*/
-    let labelElement: HTMLLabelElement = document.querySelector("label.error_label")!;
+    let labelElement: HTMLLabelElement = document.querySelector("label.error_label")! as HTMLLabelElement;
     /**@type HTMLButtonElement*/
-    let generateButton: HTMLButtonElement = document.querySelector("button.generate_button")!;
-    let downloadButton: HTMLButtonElement = document.querySelector("button.download_button")!;
-    let autoformatButton: HTMLButtonElement = document.querySelector("button.auto_format")!;
+    let generateButton: HTMLButtonElement = document.querySelector("button.generate_button")! as HTMLButtonElement;
+    let downloadButton: HTMLButtonElement = document.querySelector("button.download_button")! as HTMLButtonElement;
+    let autoformatButton: HTMLButtonElement = document.querySelector("button.auto_format")! as HTMLButtonElement;
     let nameInput =document.querySelector("#save-name") as HTMLInputElement;
     autoformatButton.onclick = function () {
 
@@ -30,7 +30,7 @@ setTimeout(function () {
     const TEST_COMPILE_INFO = new CompileInfo(1, 0, 0);
 
     function inputElement(selectors: string) {
-        let element: HTMLInputElement = document.querySelector(selectors)!;
+        let element: HTMLInputElement = document.querySelector(selectors)! as HTMLInputElement;
         return element;
     }
 
