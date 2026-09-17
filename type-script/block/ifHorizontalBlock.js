@@ -1,5 +1,17 @@
 "use strict";
 //depends: block
+function blockContainsDecision(block) {
+    if (block instanceof IfHorizontalBlock) {
+        return true;
+    }
+    if (block instanceof SimpleBlockOfBlocks || block instanceof HorizontalBranchBlockOfBlocks) {
+        for (let inner of block.innerElements) {
+            if (blockContainsDecision(inner))
+                return true;
+        }
+    }
+    return false;
+}
 class IfHorizontalBlock extends BlockOfBlocks {
     constructor(rootElement) {
         super(rootElement);
@@ -17,7 +29,16 @@ class IfHorizontalBlock extends BlockOfBlocks {
         applier.apply(this);
         return this;
     }
+    usesStackedElseIf() {
+        return this.innerElements.length == 2 && this.innerElements.some(blockContainsDecision);
+    }
+    stackedBranchGap(compileInfo) {
+        return compileInfo.topMargin * 2;
+    }
     calculateBoundingBox(compileInfo) {
+        if (this.usesStackedElseIf()) {
+            return this.calculateStackedBoundingBox(compileInfo);
+        }
         let rootElement = this.rootElement;
         let rootSize = rootElement.measureSize(compileInfo);
         let rootH = rootSize.height;
@@ -50,6 +71,30 @@ class IfHorizontalBlock extends BlockOfBlocks {
         bounds.bottom += compileInfo.topMargin * 4;
         return new BlockBoundingBoxWithChildren(bounds, 0, boxes);
     }
+    calculateStackedBoundingBox(compileInfo) {
+        let rootElement = this.rootElement;
+        let rootSize = rootElement.measureSize(compileInfo);
+        let rootH = rootSize.height;
+        let rootW = rootSize.width;
+        let boxes = this.innerElements.map(it => it.calculateBoundingBox(compileInfo));
+        let thenBounds = boxes[0].bounds;
+        let elseBounds = boxes[1].bounds;
+        let topMargin = compileInfo.topMargin;
+        let wirePad = this.marginBetweenBlocks;
+        let bounds = Bounds.makeZero();
+        bounds.expand(-rootW / 2, 0);
+        bounds.expand(rootW / 2, rootH);
+        let thenY = rootH + topMargin;
+        bounds.expandBound(thenBounds.copy().shift(0, thenY));
+        let elseY = thenY + thenBounds.height() + this.stackedBranchGap(compileInfo);
+        bounds.expandBound(elseBounds.copy().shift(0, elseY));
+        let rightWire = Math.max(rootW / 2, thenBounds.right, elseBounds.right) + wirePad;
+        let leftWire = Math.min(-rootW / 2, thenBounds.left, elseBounds.left) - wirePad;
+        bounds.expand(rightWire, bounds.bottom);
+        bounds.expand(leftWire, 0);
+        bounds.bottom += topMargin * 3;
+        return new BlockBoundingBoxWithChildren(bounds, 0, boxes);
+    }
     compile(centerXCursor, cursorY, compileInfo) {
         const topMargin = compileInfo.topMargin;
         let rootElement = this.rootElement;
@@ -57,6 +102,9 @@ class IfHorizontalBlock extends BlockOfBlocks {
         const rootH = rootSize.height;
         const rootW = rootSize.width;
         let myBB = this.calculateBoundingBox(compileInfo);
+        if (this.usesStackedElseIf()) {
+            return this.compileStacked(centerXCursor, cursorY, compileInfo, myBB, rootElement, rootW, rootH, topMargin);
+        }
         let svgResult = [
             "<g class='block if horizontal'>",
             bbToSvg(rootElement.name, myBB, Vector.new(centerXCursor, cursorY), "red", compileInfo),
@@ -133,6 +181,75 @@ class IfHorizontalBlock extends BlockOfBlocks {
                     svgResult.push(defaultCenterText(from.x + titlePosition.offset.x, from.y + titlePosition.offset.y, 0, 0, title.text, titlePosition.baseline, titlePosition.anchor));
                 }
             }
+        }
+        svgResult.push("</g>");
+        return new CompileResult(Vector.new(centerXCursor, cursorY), svgResult);
+    }
+    compileStacked(centerXCursor, cursorY, compileInfo, myBB, rootElement, rootW, rootH, topMargin) {
+        const centerX = centerXCursor.value;
+        const diamondY = cursorY.value;
+        let svgResult = [
+            "<g class='block if stacked'>",
+            bbToSvg(rootElement.name, myBB, Vector.new(centerXCursor, cursorY), "red", compileInfo),
+        ];
+        svgResult.push.apply(svgResult, rootElement.compile(centerX - rootW / 2, diamondY, rootW, rootH));
+        let thenBlock = this.innerElements[0];
+        let elseBlock = this.innerElements[1];
+        let thenBB = myBB.children[0];
+        let elseBB = myBB.children[1];
+        let branchTitles = this.branchTitles;
+        let daPosition = IfHorizontalBlock.TITLE_POSITION[3][1];
+        let netPosition = IfHorizontalBlock.TITLE_POSITION[3][2];
+        if (branchTitles != null) {
+            svgResult.push(defaultCenterText(centerX + daPosition.offset.x, diamondY + rootH + daPosition.offset.y, 0, 0, branchTitles[0], daPosition.baseline, daPosition.anchor));
+            svgResult.push(defaultCenterText(centerX + rootW / 2 + netPosition.offset.x, diamondY + rootH / 2 + netPosition.offset.y, 0, 0, branchTitles[1], netPosition.baseline, netPosition.anchor));
+        }
+        cursorY.move(rootH);
+        cursorY.move(topMargin);
+        let thenStartY = cursorY.value;
+        let wasLast = compileInfo.isLast;
+        compileInfo.isLast = false;
+        let thenResult = thenBlock.compile(centerXCursor, cursorY.clone(), compileInfo);
+        svgResult.push.apply(svgResult, thenResult.svgCode);
+        let elseStartY = thenStartY + thenBB.bounds.height() + this.stackedBranchGap(compileInfo);
+        cursorY.value = elseStartY;
+        compileInfo.isLast = wasLast;
+        let elseResult = elseBlock.compile(centerXCursor, cursorY.clone(), compileInfo);
+        svgResult.push.apply(svgResult, elseResult.svgCode);
+        compileInfo.isLast = wasLast;
+        let rightWire = Math.max(centerX + rootW / 2, centerX + thenBB.bounds.right, centerX + elseBB.bounds.right) + this.marginBetweenBlocks;
+        let leftWire = Math.min(centerX - rootW / 2, centerX + thenBB.bounds.left, centerX + elseBB.bounds.left) - this.marginBetweenBlocks;
+        svgResult.push(makePath([
+            rawSvgLine(centerX, diamondY + rootH, centerX, thenStartY)
+        ]));
+        svgResult.push(makePath([
+            rawSvgLine(centerX + rootW / 2, diamondY + rootH / 2, rightWire, diamondY + rootH / 2),
+            rawSvgLine(rightWire, diamondY + rootH / 2, rightWire, elseStartY),
+            rawSvgLine(rightWire, elseStartY, centerX, elseStartY)
+        ]));
+        let hasAfter = !wasLast;
+        if (!hasAfter) {
+            let myParent = this.parentInfo;
+            while (myParent !== undefined) {
+                if (myParent.siblingIndex(1) !== undefined) {
+                    hasAfter = true;
+                }
+                myParent = myParent.parent.parentInfo;
+            }
+        }
+        if (hasAfter) {
+            let joinY = elseResult.output.y + topMargin * 2;
+            cursorY.value = elseResult.output.y + topMargin * 3;
+            svgResult.push(makePath([
+                rawSvgLine(thenResult.output.x, thenResult.output.y, leftWire, thenResult.output.y),
+                rawSvgLine(leftWire, thenResult.output.y, leftWire, joinY),
+                rawSvgLine(leftWire, joinY, centerX, joinY),
+                rawSvgLine(elseResult.output.x, elseResult.output.y, elseResult.output.x, joinY),
+                rawSvgLine(centerX, joinY, centerX, cursorY.value)
+            ]));
+        }
+        else {
+            cursorY.value = elseResult.output.y;
         }
         svgResult.push("</g>");
         return new CompileResult(Vector.new(centerXCursor, cursorY), svgResult);
