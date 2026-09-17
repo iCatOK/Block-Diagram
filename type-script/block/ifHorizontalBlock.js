@@ -19,8 +19,9 @@ class IfHorizontalBlock extends BlockOfBlocks {
     }
     calculateBoundingBox(compileInfo) {
         let rootElement = this.rootElement;
-        let rootH = rootElement.aspect * compileInfo.width;
-        let rootW = compileInfo.width;
+        let rootSize = rootElement.measureSize(compileInfo);
+        let rootH = rootSize.height;
+        let rootW = rootSize.width;
         let bounds;
         let boxes = this.innerElements.map(it => it.calculateBoundingBox(compileInfo));
         let hrootW = rootW / 2;
@@ -52,8 +53,9 @@ class IfHorizontalBlock extends BlockOfBlocks {
     compile(centerXCursor, cursorY, compileInfo) {
         const topMargin = compileInfo.topMargin;
         let rootElement = this.rootElement;
-        const rootH = rootElement.aspect * compileInfo.width;
-        const rootW = compileInfo.width;
+        const rootSize = rootElement.measureSize(compileInfo);
+        const rootH = rootSize.height;
+        const rootW = rootSize.width;
         let myBB = this.calculateBoundingBox(compileInfo);
         let svgResult = [
             "<g class='block if horizontal'>",

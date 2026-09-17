@@ -1,6 +1,12 @@
-function prepareNode(thisNode: ParsedNode, name: NullableGraphText, compiler: RawCompiler) {
+function prepareNode(thisNode: ParsedNode, name: NullableGraphText, compiler: RawCompiler, fallbackText: string = "") {
     let name1 = thisNode.element.name;
-    return new PreparedGraphElement(typeof name1 == "string" ? name1 : name1[0], thisNode.element.aspect, wrapRawCompiler(name, compiler));
+    return new PreparedGraphElement(
+        typeof name1 == "string" ? name1 : name1[0],
+        thisNode.element.aspect,
+        wrapRawCompiler(name, compiler),
+        name,
+        fallbackText
+    );
 }
 
 function ifStatementHandler(compiler: RawCompiler): Handler {
@@ -98,17 +104,19 @@ function nodesToBlock(block: Block, children: ParsedNode[]) {
 }
 
 function compilePrepered(openPrepare: PreparedGraphElement, centerXCursor: Cursor, cursorY: Cursor, compileInfo: CompileInfo) {
-    let width = compileInfo.width;
-    let height = compileInfo.width * openPrepare.aspect;
-    return openPrepare.compile(centerXCursor.value - width / 2, cursorY.value, width, height);
+    let size = openPrepare.measureSize(compileInfo);
+    return openPrepare.compile(centerXCursor.value - size.width / 2, cursorY.value, size.width, size.height);
 }
 
 function openCloseHandler(open: RawCompiler, close: RawCompiler, useIndent: boolean = false) {
     return handler((block, thisNode) => {
 
-        let openPrepare = prepareNode(thisNode, thisNode.content[0], open);
+        let typeName = thisNode.element.oneName();
+        let openFallback = typeName == "program" ? "Начало" : "";
+        let closeFallback = typeName == "program" ? "Конец" : "";
+        let openPrepare = prepareNode(thisNode, thisNode.content[0], open, openFallback);
 
-        let closePrepare = prepareNode(thisNode, thisNode.content[1], close);
+        let closePrepare = prepareNode(thisNode, thisNode.content[1], close, closeFallback);
         let shouldUseIndent = useIndent;
         if (thisNode.children[0].length < 2 && useIndent) {
             let valid = false;
@@ -138,10 +146,11 @@ function openCloseHandler(open: RawCompiler, close: RawCompiler, useIndent: bool
             let originalCalculateBoundingBox = blocks.calculateBoundingBox;
             blocks.calculateBoundingBox = compileInfo => {
                 let boundingBox = originalCalculateBoundingBox.call(blocks, compileInfo);
-                let fullElementWidth = compileInfo.width + compileInfo.width / 2;
+                let openSize = openPrepare.measureSize(compileInfo);
+                let fullElementWidth = openSize.width + openSize.width / 2;
                 boundingBox.bounds.shift(fullElementWidth, 0)
-                    .expand(-fullElementWidth / 2 - compileInfo.width / 4, 0)
-                    .expand(fullElementWidth / 2, openPrepare.aspect * compileInfo.width)
+                    .expand(-fullElementWidth / 2 - openSize.width / 4, 0)
+                    .expand(fullElementWidth / 2, openSize.height)
                 boundingBox.updateBounds()
                 return boundingBox
             }
@@ -152,11 +161,13 @@ function openCloseHandler(open: RawCompiler, close: RawCompiler, useIndent: bool
                 let myBB = blocks.calculateBoundingBox(compileInfo);
                 let originalBB = originalCalculateBoundingBox.call(blocks, compileInfo);
                 let bbSvg = bbToSvg("", myBB, Vector.new(centerXCursor, cursorY), "purple", compileInfo);
-                let width = compileInfo.width;
+                let openSize = openPrepare.measureSize(compileInfo);
+                let closeSize = closePrepare.measureSize(compileInfo);
+                let width = openSize.width;
                 let fullWidth = width * 1.5;
 
                 function drawLine(myStrings: string[], lineX1: number, lineX2: number) {
-                    let closeY = cursorY.value + width * closePrepare.aspect / 2
+                    let closeY = cursorY.value + closeSize.height / 2
                     myStrings.push(svgLine(lineX1, closeY, lineX2, closeY))
                 }
 
@@ -173,7 +184,7 @@ function openCloseHandler(open: RawCompiler, close: RawCompiler, useIndent: bool
                 centerXCursor.value = v1;
                 compileResult.svgCode[1] = bbSvg
 
-                cursorY.withOffset(-(closePrepare.aspect * width), () => {
+                cursorY.withOffset(-(closeSize.height), () => {
 
                     myStrings.push.apply(myStrings, compileResult.svgCode)
                     myStrings.pop()

@@ -4,11 +4,11 @@ class BlockOfElements extends AbstractBlock {
     type = BlockOfElements
 
     calculateBoundingBox(compileInfo: CompileInfo): BlockBoundingBox {
-
-        let width = 1.50 * compileInfo.width;
-        let height = (this.innerElements.length - 1) * compileInfo.topMargin;
+        let width = 0;
+        let height = this.innerElements.length == 0 ? 0 : (this.innerElements.length - 1) * compileInfo.topMargin;
         for (let innerElement of this.innerElements) {
-            height += innerElement.aspect * compileInfo.width
+            width = Math.max(width, innerElement.layoutWidth(compileInfo))
+            height += innerElement.measureSize(compileInfo).height
         }
 
         return BlockBoundingBox.makeCenter(
@@ -43,7 +43,6 @@ class BlockOfElements extends AbstractBlock {
 
     compile(x: Cursor, y: Cursor, compileInfo: CompileInfo) {
         const topMargin = compileInfo.topMargin;
-        let width = compileInfo.width;
         let svgResult: string[] = [
 
             bbToSvg("elements", this.calculateBoundingBox(compileInfo), Vector.new(x, y), "blue", compileInfo)
@@ -52,7 +51,9 @@ class BlockOfElements extends AbstractBlock {
         console.log(x,y)
         for (let i = 0; i < this.innerElements.length; i++) {
             let innerElement = this.innerElements[i];
-            let height = innerElement.aspect * width;
+            let size = innerElement.measureSize(compileInfo);
+            let height = size.height;
+            let width = size.width;
             if (prevPosition !== null) {
                 svgResult.push(svgLine(x.value, y.value, x.value, y.value - topMargin))
             }

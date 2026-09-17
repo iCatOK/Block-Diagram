@@ -46,8 +46,9 @@ class SidedIfBlock extends AbstractBlock {
                 bounds = firstData.bounds.copy().merge(secondData.bounds, Direction.Right, this.marginBetweenBlocks);
                 break;
         }
-        let rootH = this.rootElement.aspect * compileInfo.width;
-        let fullWidth = compileInfo.width * 1.5;
+        let rootSize = this.rootElement.measureSize(compileInfo);
+        let rootH = rootSize.height;
+        let fullWidth = rootSize.width;
         bounds.shift(0, rootH + compileInfo.topMargin);
         bounds.expand(-fullWidth / 2, 0);
         bounds.expand(fullWidth / 2, rootH);
@@ -58,8 +59,9 @@ class SidedIfBlock extends AbstractBlock {
     compile(centerXCursor, cursorY, compileInfo) {
         const topMargin = compileInfo.topMargin;
         const rootElement = this.rootElement;
-        const rootW = compileInfo.width;
-        const rootH = rootElement.aspect * rootW;
+        const rootSize = rootElement.measureSize(compileInfo);
+        const rootW = rootSize.width;
+        const rootH = rootSize.height;
         const myBB = this.calculateBoundingBox(compileInfo);
         const svgResult = [
             "<g class='block ifBlock'>",

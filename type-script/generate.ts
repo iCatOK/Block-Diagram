@@ -27,8 +27,6 @@ setTimeout(function () {
             generateButton.onclick()
         }
     })
-    const TEST_COMPILE_INFO = new CompileInfo(1, 0, 0);
-
     function inputElement(selectors: string) {
         let element: HTMLInputElement = document.querySelector(selectors)! as HTMLInputElement;
         return element;
@@ -45,39 +43,11 @@ setTimeout(function () {
             // svgRootElement.innerHTML = data.strings.map(it => defaultCenterText(0, 0, 0, 0, it))
             //     .join("\n")
 
-            let width = 1;
-            {
-                let defaultCenterText_prev = defaultCenterText
-                let mergedBounds = Bounds.makeZero()
-                // @ts-ignore
-                defaultCenterText = function (x, y, width, height, text, baseline:SVGDominantBaseline="middle", anchor:SVGTextAnchor="middle", widthAspect=2/3) {
-
-                    let bBox = defaultCenterText0(text, baseline, anchor, width);
-                    let w = bBox.width;
-                    let h = bBox.height;
-                    mergedBounds.expandBound(bBox.toBounds(1, 1))
-                    let aspect = widthAspect;
-                    if (aspect != 0 && Number.isFinite(aspect)) {
-                        let expectedHeight = w * aspect;
-                        if (h > expectedHeight) {
-                            w = h / aspect
-                        }
-                    }
-                    mergedBounds.expand(w, h)
-                    return ""
-                }
-                data.block.compile(new Cursor(0), new Cursor(0), TEST_COMPILE_INFO)
-                // @ts-ignore
-                defaultCenterText = defaultCenterText_prev
-                // @ts-ignore
-                window.mergedBounds = mergedBounds;
-                width = mergedBounds.width() + 10;
-            }
             let extraWidth = inputElement("input#extra-width").valueAsNumber;
-            width += extraWidth
+            if (!Number.isFinite(extraWidth)) extraWidth = 0
             let topMargin = 15;
             let compileInfo = new CompileInfo(
-                width, topMargin, extraWidth
+                0, topMargin, extraWidth
             );
             compileInfo.drawBB = inputElement("input#draw-bb").checked;
             // @ts-ignore
@@ -88,7 +58,7 @@ setTimeout(function () {
 
             let blockBoundingBox = data.block.calculateBoundingBox(compileInfo);
             let boundingBox = blockBoundingBox.bounds
-            console.log(width, blockBoundingBox)
+            console.log(blockBoundingBox)
             let cursorX = new Cursor(0);
             let cursorY = new Cursor(5);
             svgRootElement.innerHTML = SVG_STYLE_PREFIX + data.block.compile(cursorX, cursorY, compileInfo).svgCode.join("\n");
