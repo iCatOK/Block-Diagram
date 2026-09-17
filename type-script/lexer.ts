@@ -138,6 +138,22 @@ namespace Lexer {
                 if (!hasSlash && CLOSE_BRACES[braceIndex] === _char) {
                     break
                 }
+                if (hasSlash) {
+                    switch (_char) {
+                        case "n":
+                            buffer += "\n"
+                            break
+                        case "t":
+                            buffer += "\t"
+                            break
+                        default:
+                            // как сейчас: \) → ), \\ → \
+                            buffer += _char
+                            break
+                    }
+                    hasSlash = false
+                    continue
+                }
                 buffer += _char
                 hasSlash = false;
             }
