@@ -72,6 +72,10 @@ let blockList = [
         makePath(`M ${x + width / 2} ${y + height} l ${width / 2} ${-height / 2} l ${-width / 2} ${-height / 2} l ${-width / 2} ${height / 2} Z`),
         defaultCenterText(x, y, width, height, text)
     ], IfBranchType.Right)),
+    graphElement("elif", 2 / 3, elifStatementHandler((x, y, width, height, text) => [
+        makePath(`M ${x + width / 2} ${y + height} l ${width / 2} ${-height / 2} l ${-width / 2} ${-height / 2} l ${-width / 2} ${height / 2} Z`),
+        defaultCenterText(x, y, width, height, text)
+    ])),
     graphElement("loop", 2 / 3, openCloseHandler(loopOpenRawCompiler, loopCloseRawCompiler)),
     graphElement("sideLoop", 2 / 3, openCloseHandler(loopOpenRawCompiler, loopCloseRawCompiler, true)),
     graphElement(["parallel", "join"], 0, (currentBlock, thisNode) => {

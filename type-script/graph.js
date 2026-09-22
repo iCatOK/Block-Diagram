@@ -49,7 +49,8 @@ class PreparedGraphElement {
             }
             case "if":
             case "left_if":
-            case "right_if": {
+            case "right_if":
+            case "elif": {
                 let width = tw + DIAMOND_POINT_X * 2 + extra;
                 let height = th + DIAMOND_POINT_Y * 2;
                 let fit = tw / width + th / height;

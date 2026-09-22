@@ -75,6 +75,65 @@ function ifSideStatementHandler(compiler: RawCompiler, ifType: IfBranchType): Ha
     })
 }
 
+function elifConditionElement(thisNode: ParsedNode, text: string, compiler: RawCompiler): PreparedGraphElement {
+    return new PreparedGraphElement(
+        thisNode.element.oneName(),
+        thisNode.element.aspect,
+        wrapRawCompiler(text, compiler),
+        text,
+        ""
+    )
+}
+
+function elifStatementHandler(compiler: RawCompiler): Handler {
+    const defaultNames = [
+        "Да", "Нет"
+    ]
+    return handler((block: Block, thisNode: ParsedNode) => {
+        let conditions = thisNode.content.filter(text => text != null && String(text).length > 0)
+        if (conditions.length > 1) {
+            let branchCount = thisNode.children.length
+            if (branchCount != conditions.length && branchCount != conditions.length + 1) {
+                return Result.error("elif chain needs a branch per condition, plus an optional else")
+            }
+            let cases: ElifCase[] = []
+            for (let i = 0; i < conditions.length; i++) {
+                let blocks = new SimpleBlockOfBlocks()
+                let branchBlock = nodesToBlock(blocks, thisNode.children[i])
+                if (branchBlock.isError()) return branchBlock
+                cases.push(new ElifCase(elifConditionElement(thisNode, conditions[i], compiler), blocks))
+            }
+            let elseBody: Block | null = null
+            if (branchCount == conditions.length + 1) {
+                let blocks = new SimpleBlockOfBlocks()
+                let branchBlock = nodesToBlock(blocks, thisNode.children[branchCount - 1])
+                if (branchBlock.isError()) return branchBlock
+                elseBody = blocks
+            }
+            return Result.ok(block.addBlock(new VerticalElifChain(cases, elseBody)))
+        }
+
+        let childrenAmount = thisNode.children.length;
+        if (childrenAmount == 1) {
+            thisNode.children.push([])
+        }
+        if (thisNode.children.length != 2) return Result.error("elif supports exactly two branches")
+        let branches: IfBlockBranch[] = []
+        for (let i = 0; i < thisNode.children.length; i++) {
+            let child = thisNode.children[i];
+            let blocks = new SimpleBlockOfBlocks()
+            let branchBlock = nodesToBlock(blocks, child);
+            if (branchBlock.isError()) return branchBlock
+            branches[i] = new IfBlockBranch(blocks, thisNode.titles[i] || defaultNames[i])
+        }
+        let ifBlock = new VerticalIfBlock(
+            prepareNode(thisNode, thisNode.content, compiler),
+            branches[0], branches[1]
+        )
+        return Result.ok(block.addBlock(ifBlock))
+    })
+}
+
 
 const handler = (h: Handler, extra?: any) => h;
 
